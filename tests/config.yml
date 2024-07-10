@@ -3,20 +3,20 @@ watch:
     queue:
       action: stop
       length: 200
-      restart_cooldown: 60s
+      restart_cooldown: 6s
       restart: # any
         - labels: [x,y,z] # all
         - labels: c
     egress:
       action: restart
-      restart_cooldown: 60s
+      restart_cooldown: 6s
       idle: 100s
       restart:
         - labels: x
         - labels: y
     ingress:
       action: restart
-      restart_cooldown: 60s
+      restart_cooldown: 6s
       idle: 50s
       restart:
         - label: z

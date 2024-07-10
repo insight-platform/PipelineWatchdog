@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import asyncio
 import logging
 import os
@@ -6,10 +8,10 @@ import signal
 import time
 from typing import Dict, List
 
-import docker
-import requests
-from docker.errors import DockerException
-from docker.models.containers import Container
+import aiodocker
+import aiohttp
+from aiodocker import DockerError
+from aiodocker.containers import DockerContainer
 
 from src.pipeline_watchdog.config import WatchConfig, QueueConfig, FlowConfig, Action
 from src.pipeline_watchdog.config.parser import ConfigParser
@@ -25,46 +27,45 @@ logger = logging.getLogger('PipelineWatchdog')
 class DockerClient:
 
     def __init__(self):
-        self._client = docker.from_env()
+        self._client = aiodocker.Docker()
 
-    def get_containers(self, container_labels: List[List[str]]) -> List[Container]:
+    async def get_containers(self, container_labels: List[List[str]]) -> List[DockerContainer]:
         containers = []
         for labels in container_labels:
-            containers += self._client.containers.list(filters={"label": labels})
+            containers += await self._client.containers.list(filters={"label": labels})
 
         return containers
 
     @staticmethod
-    def restart_container(container: Container):
+    async def restart_container(container: DockerContainer):
         try:
-            container.restart()
-        except DockerException:
-            logger.error('Failed to restart container %s. Skipping', container.name)
+            await container.restart()
+        except DockerError:
+            logger.error('Failed to restart container %s. Skipping', container.id)
 
     @staticmethod
-    def stop_container(container: Container):
+    async def stop_container(container: DockerContainer):
         try:
-            container.stop()
-        except DockerException:
-            logger.error('Failed to stop container %s. Skipping', container.name)
+            await container.stop()
+        except DockerError:
+            logger.error('Failed to stop container %s. Skipping', container.id)
 
-    def __del__(self):
-        self._client.close()
-
-
-def get_metrics(buffer_url: str) -> requests.Response:
-    try:
-        response = requests.get(f'http://{buffer_url}/metrics')
-        return response
-    except requests.RequestException as e:
-        raise RuntimeError(f'Failed to get metrics from {buffer_url}. {e}')
+    async def close(self):
+        await self._client.close()
 
 
-def parse_metrics(response: requests.Response) -> Dict[str, float]:
+async def get_metrics(buffer_url: str) -> str:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'http://{buffer_url}/metrics') as response:
+            content = await response.text()
+            return content
+
+
+async def parse_metrics(content: str) -> Dict[str, float]:
     metrics = {}
 
     try:
-        for match in METRIC_PATTERN.finditer(response.text):
+        for match in METRIC_PATTERN.finditer(content):
             metric, value = match.groups()
             metrics[metric] = float(value)
     except Exception as e:
@@ -73,61 +74,61 @@ def parse_metrics(response: requests.Response) -> Dict[str, float]:
     return metrics
 
 
-def process_action(docker_client: DockerClient, action: Action, container_labels: List[List[str]]):
-    containers = docker_client.get_containers(container_labels)
+async def process_action(docker_client: DockerClient, action: Action, container_labels: List[List[str]]):
+    containers = await docker_client.get_containers(container_labels)
 
     if action == Action.STOP:
         logger.debug('Stopping containers')
         for container in containers:
-            docker_client.stop_container(container)
+            await docker_client.stop_container(container)
     elif action == Action.RESTART:
         logger.debug('Restarting containers')
         for container in containers:
-            docker_client.restart_container(container)
+            await docker_client.restart_container(container)
     else:
         raise RuntimeError(f'Unknown action {action}')
 
 
 async def watch_queue(docker_client: DockerClient, buffer: str, config: QueueConfig):
     while True:
-        response = get_metrics(buffer)
-        metrics = parse_metrics(response)
+        content = await get_metrics(buffer)
+        metrics = await parse_metrics(content)
 
         buffer_size = metrics['buffer_size']
 
         if buffer_size > config.length:
             logger.debug('Buffer %s is full, processing action %s', buffer, config.action)
-            process_action(docker_client, config.action, config.container_labels)
+            await process_action(docker_client, config.action, config.container_labels)
 
         await asyncio.sleep(config.restart_cooldown)
 
 
 async def watch_egress(docker_client: DockerClient, buffer: str, config: FlowConfig):
     while True:
-        response = get_metrics(buffer)
-        metrics = parse_metrics(response)
+        content = await get_metrics(buffer)
+        metrics = await parse_metrics(content)
 
         last_sent_message = metrics['last_sent_message']
         now = time.time()
 
         if now - last_sent_message > config.idle:
             logger.debug('Egress flow %s is idle, processing action %s', buffer, config.action)
-            process_action(docker_client, config.action, config.container_labels)
+            await process_action(docker_client, config.action, config.container_labels)
 
         await asyncio.sleep(config.restart_cooldown)
 
 
 async def watch_ingress(docker_client: DockerClient, buffer: str, config: FlowConfig):
     while True:
-        response = get_metrics(buffer)
-        metrics = parse_metrics(response)
+        content = await get_metrics(buffer)
+        metrics = await parse_metrics(content)
 
         last_received_message = metrics['last_received_message']
         now = time.time()
 
         if now - last_received_message > config.idle:
             logger.debug('Ingress flow %s is idle, processing action %s', buffer, config.action)
-            process_action(docker_client, config.action, config.container_labels)
+            await process_action(docker_client, config.action, config.container_labels)
 
         await asyncio.sleep(config.restart_cooldown)
 
@@ -168,6 +169,7 @@ def main():
         logger.error('Shutting down the pipeline watchdog')
     finally:
         loop.close()
+        asyncio.run(docker_client.close())
 
 
 if __name__ == '__main__':
