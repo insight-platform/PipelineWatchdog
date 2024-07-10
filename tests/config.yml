@@ -1,0 +1,22 @@
+watch:
+  - buffer: 127.0.0.1:8000
+    queue:
+      action: stop
+      length: 200
+      restart_cooldown: 60s
+      restart: # any
+        - labels: [x,y,z] # all
+        - labels: c
+    egress:
+      action: restart
+      restart_cooldown: 60s
+      idle: 100s
+      restart:
+        - labels: x
+        - labels: y
+    ingress:
+      action: restart
+      restart_cooldown: 60s
+      idle: 50s
+      restart:
+        - label: z
