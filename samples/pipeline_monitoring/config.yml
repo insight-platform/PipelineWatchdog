@@ -4,19 +4,18 @@ watch:
       action: stop
       length: 200
       restart_cooldown: 6s
-      restart: # any
-        - labels: [x,y,z] # all
-        - labels: c
+      container:
+        - labels: [queue-sdk-client-label1, queue-sdk-client-label2]
     egress:
       action: restart
       restart_cooldown: 6s
       idle: 100s
-      restart:
-        - labels: x
-        - labels: y
+      container:
+        - labels: egress-sdk-client-label
+        - labels: some-label
     ingress:
       action: restart
       restart_cooldown: 6s
       idle: 50s
-      restart:
-        - label: z
+      container:
+        - label: ingress-sdk-client-label

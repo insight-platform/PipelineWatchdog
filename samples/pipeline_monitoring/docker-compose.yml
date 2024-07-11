@@ -1,0 +1,63 @@
+version: "3.3"
+services:
+
+  video-loop-source:
+    image: ghcr.io/insight-platform/savant-adapters-gstreamer:latest
+    restart: unless-stopped
+    volumes:
+      - /tmp/zmq-sockets:/tmp/zmq-sockets
+      - video-loop:/tmp/video-loop-source-downloads
+    environment:
+      - LOCATION=https://eu-central-1.linodeobjects.com/savant-data/demo/Free_City_Street_Footage.mp4
+      - DOWNLOAD_PATH=/tmp/video-loop-source-downloads
+      - ZMQ_ENDPOINT=pub+connect:ipc:///tmp/zmq-sockets/buffer.ipc
+      - SOURCE_ID=city-traffic
+      - SYNC_OUTPUT=True
+    entrypoint: /opt/savant/adapters/gst/sources/video_loop.sh
+    depends_on:
+      buffer:
+        condition: service_started
+
+  buffer:
+    image: ghcr.io/insight-platform/savant-adapters-py:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /tmp/zmq-sockets:/tmp/zmq-sockets
+      - buffer:/tmp/savant-adapter/buffer
+    environment:
+      - ZMQ_SRC_ENDPOINT=sub+bind:ipc:///tmp/zmq-sockets/buffer.ipc
+      - ZMQ_SINK_ENDPOINT=dealer+connect:ipc:///tmp/zmq-sockets/input-video.ipc
+      - BUFFER_PATH=/tmp/savant-adapter/buffer
+      - BUFFER_LEN=1000
+      - INTERVAL=0.1
+      - METRICS_FRAME_PERIOD=1000
+      - METRICS_TIME_PERIOD=10
+      - STATS_LOG_INTERVAL=10
+      - METRICS_PROVIDER=prometheus
+      - METRICS_PROVIDER_PARAMS={"port":8000, "labels":{"adapter":"buffer"}}
+    command: python -m adapters.python.bridge.buffer
+
+  pipeline-watchdog:
+    container_name: pipeline-watchdog
+    build:
+      context: ../..
+      dockerfile: ./samples/pipeline_monitoring/Dockerfile
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.yml:/app/config.yml
+    environment:
+      - LOGLEVEL=INFO
+      - CONFIG_FILE_PATH=/app/config.yml
+    depends_on:
+      buffer:
+        condition: service_started
+
+  # todo add sdk client
+
+volumes:
+  buffer:
+  video-loop:

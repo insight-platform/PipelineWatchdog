@@ -15,7 +15,7 @@ class ConfigParser:
             action=Action(queue_config['action']),
             length=queue_config['length'],
             restart_cooldown=convert_to_seconds(queue_config['restart_cooldown']),
-            container_labels=[list(labels.values()) for labels in queue_config['restart']]
+            container_labels=[list(*labels.values()) for labels in queue_config['container']]
         )
 
     @staticmethod
@@ -24,7 +24,7 @@ class ConfigParser:
             action=Action(flow_config['action']),
             idle=convert_to_seconds(flow_config['idle']),
             restart_cooldown=convert_to_seconds(flow_config['restart_cooldown']),
-            container_labels=[list(labels.values()) for labels in flow_config['restart']]
+            container_labels=[list(*labels.values()) for labels in flow_config['container']]
         )
 
     def __parse_watch_config(self, watch_config: dict):

@@ -5,6 +5,8 @@ RUN python -m pip install --no-cache-dir -r requirements.txt && \
     rm -rf requirements.txt
 
 WORKDIR /app
-COPY agent.py agent.py
+COPY src/ src/
 
-ENTRYPOINT ["python", "agent.py"]
+ENV PYTHONPATH /app
+
+ENTRYPOINT ["python", "src/pipeline_watchdog/run.py"]

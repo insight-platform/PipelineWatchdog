@@ -32,7 +32,10 @@ class DockerClient:
     async def get_containers(self, container_labels: List[List[str]]) -> List[DockerContainer]:
         containers = []
         for labels in container_labels:
-            containers += await self._client.containers.list(filters={"label": labels})
+            try:
+                containers += await self._client.containers.list(filters={"label": labels})
+            except DockerError:
+                raise RuntimeError(f'Failed to list containers with labels {labels}')
 
         return containers
 
