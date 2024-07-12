@@ -43,6 +43,7 @@ class DockerClient:
     async def restart_container(container: DockerContainer):
         try:
             await container.restart()
+            logger.debug('Container %s restarted', container.id)
         except DockerError:
             logger.error('Failed to restart container %s. Skipping', container.id)
 
@@ -50,6 +51,7 @@ class DockerClient:
     async def stop_container(container: DockerContainer):
         try:
             await container.stop()
+            logger.debug('Container %s stopped', container.id)
         except DockerError:
             logger.error('Failed to stop container %s. Skipping', container.id)
 
@@ -79,6 +81,10 @@ async def parse_metrics(content: str) -> Dict[str, float]:
 
 async def process_action(docker_client: DockerClient, action: Action, container_labels: List[List[str]]):
     containers = await docker_client.get_containers(container_labels)
+
+    if not containers:
+        logger.debug('No containers found with labels %s', container_labels)
+        return
 
     if action == Action.STOP:
         logger.debug('Stopping containers')

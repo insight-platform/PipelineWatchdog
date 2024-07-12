@@ -2,20 +2,20 @@ watch:
   - buffer: 127.0.0.1:8000
     queue:
       action: stop
-      length: 200
-      restart_cooldown: 6s
+      length: 1990
+      restart_cooldown: 60s
       container:
-        - labels: [queue-sdk-client-label1, queue-sdk-client-label2]
+        - labels: [queue-client-label1, queue-client-label2=2]
     egress:
       action: restart
-      restart_cooldown: 6s
-      idle: 100s
+      restart_cooldown: 60s
+      idle: 60s
       container:
-        - labels: egress-sdk-client-label
+        - labels: egress-client-label=egress-client-value
         - labels: some-label
     ingress:
       action: restart
-      restart_cooldown: 6s
-      idle: 50s
+      restart_cooldown: 30s
+      idle: 30s
       container:
-        - label: ingress-sdk-client-label
+        - labels: ingress-client-label=3

@@ -10,12 +10,23 @@ class ConfigParser:
         self._config_path = config_path
 
     @staticmethod
+    def __parse_labels(labels_list: list) -> list:
+        labels = []
+        for label_dict in labels_list:
+            for label in label_dict.values():
+                if isinstance(label, list):
+                    labels.append(label)
+                else:
+                    labels.append([label])
+        return labels
+
+    @staticmethod
     def __parse_queue_config(queue_config: dict):
         return QueueConfig(
             action=Action(queue_config['action']),
             length=queue_config['length'],
             restart_cooldown=convert_to_seconds(queue_config['restart_cooldown']),
-            container_labels=[list(*labels.values()) for labels in queue_config['container']]
+            container_labels=ConfigParser.__parse_labels(queue_config['container'])
         )
 
     @staticmethod
@@ -24,15 +35,16 @@ class ConfigParser:
             action=Action(flow_config['action']),
             idle=convert_to_seconds(flow_config['idle']),
             restart_cooldown=convert_to_seconds(flow_config['restart_cooldown']),
-            container_labels=[list(*labels.values()) for labels in flow_config['container']]
+            container_labels=ConfigParser.__parse_labels(flow_config['container'])
         )
 
-    def __parse_watch_config(self, watch_config: dict):
+    @staticmethod
+    def __parse_watch_config(watch_config: dict):
         return WatchConfig(
             buffer=watch_config['buffer'],
-            queue=self.__parse_queue_config(watch_config['queue']),
-            egress=self.__parse_flow_config(watch_config['egress']),
-            ingress=self.__parse_flow_config(watch_config['ingress'])
+            queue=ConfigParser.__parse_queue_config(watch_config['queue']),
+            egress=ConfigParser.__parse_flow_config(watch_config['egress']),
+            ingress=ConfigParser.__parse_flow_config(watch_config['ingress'])
         )
 
     def parse(self) -> Config:
