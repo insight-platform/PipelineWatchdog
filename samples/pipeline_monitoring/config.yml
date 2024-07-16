@@ -2,7 +2,7 @@ watch:
   - buffer: 127.0.0.1:8000
     queue:
       action: stop
-      length: 1990
+      length: 999
       restart_cooldown: 60s
       container:
         - labels: [queue-client-label1, queue-client-label2=2]

@@ -14,4 +14,10 @@ def init_logging(loglevel: str):
 
 
 def convert_to_seconds(s):
-    return int(s[:-1]) * seconds_per_unit[s[-1]]
+    seconds = int(s[:-1]) * seconds_per_unit[s[-1]]
+
+    if seconds < 0:
+        raise ValueError("Invalid input")
+
+    return seconds
+

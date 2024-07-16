@@ -1,0 +1,41 @@
+watch:
+  - buffer: buffer1:8000
+    queue:
+      action: restart
+      length: 18
+      restart_cooldown: 60s
+      container:
+        - labels: [label1, label2=2]
+        - labels: some-label
+    egress:
+      action: stop
+      restart_cooldown: 60s
+      idle: 100s
+      container:
+        - labels: egress-label=egress-value
+        - labels: some-label
+    ingress:
+      action: restart
+      restart_cooldown: 30s
+      idle: 60s
+      container:
+        - labels: some-label
+  - buffer: buffer2:8002
+    queue:
+      action: stop
+      length: 999
+      restart_cooldown: 50s
+      container:
+        - labels: some-label
+    egress:
+      action: restart
+      restart_cooldown: 90s
+      idle: 100s
+      container:
+        - labels: egress-label=egress-value
+    ingress:
+      action: stop
+      restart_cooldown: 60s
+      idle: 70s
+      container:
+        - labels: some-label

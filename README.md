@@ -86,3 +86,17 @@ KeyboardInterrupt
 ```bash
 docker compose -f samples/pipeline_monitoring/docker-compose.yml down
 ```
+
+## Development
+
+### Install requirements
+
+```bash
+make init
+```
+
+### Run tests
+
+```bash
+make test
+```

@@ -50,8 +50,7 @@ class ConfigParser:
     def parse(self) -> Config:
         with open(self._config_path, 'r') as file:
             parsed_yaml = yaml.load(file, Loader=yaml.Loader)
-            parsed_yaml['watch'] = [self.__parse_watch_config(w) for w in parsed_yaml['watch']]
-            config = Config(**parsed_yaml)
+            config = Config([self.__parse_watch_config(w) for w in parsed_yaml['watch']])
 
         return config
 
