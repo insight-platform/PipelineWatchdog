@@ -33,7 +33,7 @@ class DockerClient:
         containers = []
         for labels in container_labels:
             try:
-                containers += await self._client.containers.list(filters={"label": labels})
+                containers += await self._client.containers.list(all=True, filters={"label": labels})
             except DockerError:
                 raise RuntimeError(f'Failed to list containers with labels {labels}')
 

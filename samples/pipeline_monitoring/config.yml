@@ -9,13 +9,13 @@ watch:
     egress:
       action: restart
       restart_cooldown: 60s
-      idle: 60s
+      idle: 100s
       container:
         - labels: egress-client-label=egress-client-value
         - labels: some-label
     ingress:
       action: restart
       restart_cooldown: 30s
-      idle: 30s
+      idle: 60s
       container:
         - labels: ingress-client-label=3

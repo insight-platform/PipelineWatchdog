@@ -1,6 +1,6 @@
 # Watchdog
 This service watches the health of pipeline by monitoring one or more buffers in parallel.
-It will restart designated pipeline services if the buffer queue length exceeds a threshold value or the time since the last output or input message exceeds a specified time. 
+It will stop or restart designated pipeline services if the buffer queue length exceeds a threshold value or the time since the last output or input message exceeds a specified time. 
 Queue monitoring helps detect the slow processing of messages, and ingress and egress monitoring is helpful in detecting how pipeline services are processing messages. 
 In other words, the service can detect if the pipeline is not processing messages at the expected rate or if the pipeline is not processing messages at all.
 
@@ -62,6 +62,23 @@ The sample demonstrates how to start the watchdog service with an example pipeli
 
 ```bash
 docker compose -f samples/pipeline_monitoring/docker-compose.yml up --build -d
+```
+
+### Check
+
+After starting the pipeline, you can check the logs of the client container:
+```bash
+docker logs -f pipeline_monitoring-client-1
+```
+When the client stops processing messages for more than `egress.idle` seconds (see [config](samples/pipeline_monitoring/config.yml)) 
+you will see the following logs in the client container, and the container itself will be restarted:
+```
+Traceback (most recent call last):
+  File "/opt/savant/src/client.py", line 52, in <module>
+    main()
+  File "/opt/savant/src/client.py", line 37, in main
+    time.sleep(sleep_duration)
+KeyboardInterrupt
 ```
 
 ### Stop

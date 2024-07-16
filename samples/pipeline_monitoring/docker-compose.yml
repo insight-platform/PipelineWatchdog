@@ -14,6 +14,8 @@ services:
       - SOURCE_ID=city-traffic
       - SYNC_OUTPUT=True
     entrypoint: /opt/savant/adapters/gst/sources/video_loop.sh
+    labels:
+      ingress-client-label: 3
     depends_on:
       buffer:
         condition: service_started
@@ -50,7 +52,6 @@ services:
     labels:
       queue-client-label1: 1
       queue-client-label2: 2
-      ingress-client-label: 3
       egress-client-label: egress-client-value
     volumes:
       - /tmp/zmq-sockets:/tmp/zmq-sockets
