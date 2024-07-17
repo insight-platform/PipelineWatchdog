@@ -18,17 +18,15 @@ def main():
 
     zmq_sink_endpoint = os.environ.get('ZMQ_SINK_ENDPOINT')
     min_sleep = int(os.environ.get('MIN_SLEEP', 0))
-    max_sleep = int(os.environ.get('MAX_SLEEP', 300))
+    max_sleep = int(os.environ.get('MAX_SLEEP', 200))
 
     if not zmq_sink_endpoint:
-        sys.exit('ZMQ_SINK_ENDPOINT is not set. Please provide the ZMQ_SINK_ENDPOINT in the environment variable.')
+        sys.exit(
+            'ZMQ_SINK_ENDPOINT is not set. Please provide the ZMQ_SINK_ENDPOINT in the environment variable.'
+        )
 
     # Build the sink
-    sink = (
-        SinkBuilder()
-        .with_socket(zmq_sink_endpoint)
-        .build()
-    )
+    sink = SinkBuilder().with_socket(zmq_sink_endpoint).build()
 
     for result in sink:
         sleep_duration = random.uniform(min_sleep, max_sleep)
@@ -41,7 +39,7 @@ def main():
                 'Received frame %s/%s (keyframe=%s)',
                 result.frame_meta.source_id,
                 result.frame_meta.pts,
-                result.frame_meta.keyframe
+                result.frame_meta.keyframe,
             )
         else:
             source_id = result.eos.source_id

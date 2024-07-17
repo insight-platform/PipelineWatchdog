@@ -26,7 +26,7 @@ class ConfigParser:
             action=Action(queue_config['action']),
             length=queue_config['length'],
             restart_cooldown=convert_to_seconds(queue_config['restart_cooldown']),
-            container_labels=ConfigParser.__parse_labels(queue_config['container'])
+            container_labels=ConfigParser.__parse_labels(queue_config['container']),
         )
 
     @staticmethod
@@ -35,7 +35,7 @@ class ConfigParser:
             action=Action(flow_config['action']),
             idle=convert_to_seconds(flow_config['idle']),
             restart_cooldown=convert_to_seconds(flow_config['restart_cooldown']),
-            container_labels=ConfigParser.__parse_labels(flow_config['container'])
+            container_labels=ConfigParser.__parse_labels(flow_config['container']),
         )
 
     @staticmethod
@@ -44,13 +44,14 @@ class ConfigParser:
             buffer=watch_config['buffer'],
             queue=ConfigParser.__parse_queue_config(watch_config['queue']),
             egress=ConfigParser.__parse_flow_config(watch_config['egress']),
-            ingress=ConfigParser.__parse_flow_config(watch_config['ingress'])
+            ingress=ConfigParser.__parse_flow_config(watch_config['ingress']),
         )
 
     def parse(self) -> Config:
         with open(self._config_path, 'r') as file:
             parsed_yaml = yaml.load(file, Loader=yaml.Loader)
-            config = Config([self.__parse_watch_config(w) for w in parsed_yaml['watch']])
+            config = Config(
+                [self.__parse_watch_config(w) for w in parsed_yaml['watch']]
+            )
 
         return config
-

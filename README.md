@@ -92,7 +92,13 @@ docker compose -f samples/pipeline_monitoring/docker-compose.yml down
 ### Install requirements
 
 ```bash
-make init
+make init-dev
+```
+
+### Format code
+
+```bash
+make reformat
 ```
 
 ### Run tests
