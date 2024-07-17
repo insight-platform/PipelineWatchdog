@@ -22,6 +22,9 @@ class ConfigParser:
 
     @staticmethod
     def __parse_queue_config(queue_config: dict):
+        if queue_config is None:
+            return None
+
         return QueueConfig(
             action=Action(queue_config['action']),
             length=queue_config['length'],
@@ -31,6 +34,9 @@ class ConfigParser:
 
     @staticmethod
     def __parse_flow_config(flow_config: dict):
+        if flow_config is None:
+            return None
+
         return FlowConfig(
             action=Action(flow_config['action']),
             idle=convert_to_seconds(flow_config['idle']),
@@ -42,16 +48,21 @@ class ConfigParser:
     def __parse_watch_config(watch_config: dict):
         return WatchConfig(
             buffer=watch_config['buffer'],
-            queue=ConfigParser.__parse_queue_config(watch_config['queue']),
-            egress=ConfigParser.__parse_flow_config(watch_config['egress']),
-            ingress=ConfigParser.__parse_flow_config(watch_config['ingress']),
+            queue=ConfigParser.__parse_queue_config(watch_config.get('queue')),
+            egress=ConfigParser.__parse_flow_config(watch_config.get('egress')),
+            ingress=ConfigParser.__parse_flow_config(watch_config.get('ingress')),
         )
 
     def parse(self) -> Config:
         with open(self._config_path, 'r') as file:
-            parsed_yaml = yaml.load(file, Loader=yaml.Loader)
-            config = Config(
-                [self.__parse_watch_config(w) for w in parsed_yaml['watch']]
-            )
+            parsed_yaml = yaml.load(file, Loader=yaml.FullLoader)
+            watch = parsed_yaml.get('watch')
+
+            if not watch:
+                raise ValueError(
+                    'No watch configs found in the config file. Please specify at least one.'
+                )
+
+            config = Config([self.__parse_watch_config(w) for w in watch])
 
         return config

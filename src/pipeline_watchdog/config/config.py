@@ -1,7 +1,7 @@
 # This file contains the configuration classes for the pipeline watchdog
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 
 class Action(Enum):
@@ -50,13 +50,13 @@ class WatchConfig:
     buffer: str
     """Buffer url to retrieve metrics."""
 
-    queue: QueueConfig
+    queue: Optional[QueueConfig]
     """Queue watch configuration."""
 
-    egress: FlowConfig
+    egress: Optional[FlowConfig]
     """Egress traffic watch configuration."""
 
-    ingress: FlowConfig
+    ingress: Optional[FlowConfig]
     """Ingress traffic watch configuration."""
 
 

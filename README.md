@@ -39,18 +39,20 @@ watch:
 
 Where:
 * `buffer` - url of the buffer to watch.
-* `queue` - configuration for the buffer queue.
+* `queue` - configuration for the buffer queue. Optional.
   * `action` - action to take when the queue length exceeds the length threshold. It can be `restart` or `stop`.
   * `length` - threshold length for the queue.
   * `restart_cooldown` - interval in seconds between buffer queue length checks.
   * `container` - list of labels to match for the action. Actions are performed on containers that match any of the label sets.
     * `labels` - one or more labels to match on the same container, i.e. the container must have all labels.
-* `ingress` or `egress` - configuration for the input or output traffic of the buffer.
+* `ingress` or `egress` - configuration for the input or output traffic of the buffer. Optional.
   * `action` - action to take when the time since the last input or output message exceeds the idle threshold. It can be `restart` or `stop`.
   * `idle` - threshold time in seconds since the last input or output message.
   * `restart_cooldown` - interval in seconds between ingress or egress idle checks.
   * `container` - list of labels to match for the action. Actions are performed on containers that match any of the label sets.
     * `labels` - one or more labels to match on the same container, i.e. the container must have all labels.
+
+**Note**: For each buffer, at least one of the `queue`, `ingress`, or `egress` sections must be present.
 
 You can find an example configuration file in the [samples](samples/pipeline_monitoring/config.yml) folder.
 

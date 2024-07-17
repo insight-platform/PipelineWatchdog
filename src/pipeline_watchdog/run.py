@@ -15,6 +15,7 @@ from aiodocker.containers import DockerContainer
 
 from src.pipeline_watchdog.config import Action, FlowConfig, QueueConfig, WatchConfig
 from src.pipeline_watchdog.config.parser import ConfigParser
+from src.pipeline_watchdog.config.validator import validate
 from src.pipeline_watchdog.utils import init_logging
 
 METRIC_PATTERN = re.compile(r'(\w+){[^}]*} ([0-9.e+-]+) \d+')
@@ -178,8 +179,9 @@ def main():
 
     try:
         config = parser.parse()
+        validate(config)
     except Exception as e:
-        logger.error('Failed to parse configuration. %s: %s', type(e).__name__, e)
+        logger.error('Invalid configuration. %s: %s', type(e).__name__, e)
         exit(1)
 
     docker_client = DockerClient()
