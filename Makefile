@@ -17,3 +17,8 @@ reformat: run-unify run-black run-isort
 
 test:
 	pytest tests
+
+git-add:
+	git add .
+
+before-commit: reformat test git-add

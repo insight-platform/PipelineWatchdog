@@ -34,7 +34,7 @@ async def test_get_containers(docker_mock):
 
     result = await client.get_containers([label1, label2])
 
-    assert containers_for_label1 + containers_for_label2 == result
+    assert result == containers_for_label1 + containers_for_label2
     assert containers.list.call_count == 2
     assert containers.list.call_args_list[0] == call(
         all=True, filters={'label': label1}

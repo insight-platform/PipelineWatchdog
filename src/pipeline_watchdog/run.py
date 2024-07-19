@@ -3,22 +3,20 @@
 import asyncio
 import logging
 import os
-import re
 import signal
 import time
-from typing import Dict, List
+from typing import List
 
 import aiodocker
-import aiohttp
 from aiodocker import DockerError
 from aiodocker.containers import DockerContainer
 
+from src.pipeline_watchdog.buffer_metrics import get_metrics, parse_metrics
 from src.pipeline_watchdog.config import Action, FlowConfig, QueueConfig, WatchConfig
 from src.pipeline_watchdog.config.parser import ConfigParser
 from src.pipeline_watchdog.config.validator import validate
 from src.pipeline_watchdog.utils import init_logging
 
-METRIC_PATTERN = re.compile(r'(\w+){[^}]*} ([0-9.e+-]+) \d+')
 LOG_LEVEL = os.environ.get('LOGLEVEL', 'INFO')
 
 init_logging(LOG_LEVEL)
@@ -62,26 +60,6 @@ class DockerClient:
 
     async def close(self):
         await self._client.close()
-
-
-async def get_metrics(buffer_url: str) -> str:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'http://{buffer_url}/metrics') as response:
-            content = await response.text()
-            return content
-
-
-async def parse_metrics(content: str) -> Dict[str, float]:
-    metrics = {}
-
-    try:
-        for match in METRIC_PATTERN.finditer(content):
-            metric, value = match.groups()
-            metrics[metric] = float(value)
-    except Exception as e:
-        raise RuntimeError(f'Failed to parse metrics: {e}')
-
-    return metrics
 
 
 async def process_action(
