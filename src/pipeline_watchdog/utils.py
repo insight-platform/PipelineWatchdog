@@ -13,7 +13,7 @@ def init_logging(loglevel: str):
     )
 
 
-def convert_to_seconds(s):
+def convert_to_seconds(s: str):
     seconds = int(s[:-1]) * seconds_per_unit[s[-1]]
 
     if seconds < 0:

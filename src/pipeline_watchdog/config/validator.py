@@ -1,4 +1,7 @@
-def validate(config):
+from src.pipeline_watchdog.config.config import Config
+
+
+def validate(config: Config):
     if any(
         [not w.queue and not w.ingress and not w.egress for w in config.watch_configs]
     ):

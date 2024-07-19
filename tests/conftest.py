@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import pytest
+import yaml
 
 from src.pipeline_watchdog.config import Action, FlowConfig, QueueConfig, WatchConfig
 from src.pipeline_watchdog.config.config import Config
@@ -75,6 +76,34 @@ def config_file_path():
     return os.path.join(os.path.dirname(__file__), 'test_config.yml')
 
 
-@pytest.fixture(scope='session')
-def empty_config_file_path():
-    return os.path.join(os.path.dirname(__file__), 'test_empty_config.yml')
+@pytest.fixture(
+    params=(
+        '',
+        'watch',
+        'watch:',
+        'watch: []',
+        'some-key: some-value',
+    )
+)
+def empty_config_file_path(request, tmpdir):
+    config_file = tmpdir.join('empty_config.txt')
+    config_file.write(request.param)
+
+    return str(config_file)
+
+
+@pytest.fixture(
+    params=(
+        {'watch': [{'some-key': 'some-value'}]},
+        {'watch': [{'buffer': 'buffer1:8000', 'queue': {'action': 'restart'}}]},
+        {'watch': [{'buffer': 'buffer1:8000', 'egress': {'action': 'restart'}}]},
+        {'watch': [{'buffer': 'buffer1:8000', 'ingress': {'action': 'restart'}}]},
+    )
+)
+def invalid_config_file_path(request, tmpdir):
+    config_file = tmpdir.join('empty_config.txt')
+
+    yaml_str = yaml.dump(request.param)
+    config_file.write(yaml_str)
+
+    return str(config_file)

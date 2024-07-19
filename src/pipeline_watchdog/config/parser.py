@@ -56,13 +56,18 @@ class ConfigParser:
     def parse(self) -> Config:
         with open(self._config_path, 'r') as file:
             parsed_yaml = yaml.load(file, Loader=yaml.FullLoader)
-            watch = parsed_yaml.get('watch')
+            watch = parsed_yaml.get('watch') if isinstance(parsed_yaml, dict) else None
 
             if not watch:
                 raise ValueError(
                     'No watch configs found in the config file. Please specify at least one.'
                 )
 
-            config = Config([self.__parse_watch_config(w) for w in watch])
+            try:
+                config = Config([self.__parse_watch_config(w) for w in watch])
+            except KeyError as e:
+                raise ValueError(
+                    f'Field "{e.args[0]}" must be specified in the watch config.'
+                )
 
         return config

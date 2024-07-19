@@ -4,7 +4,7 @@ from src.pipeline_watchdog.config import WatchConfig
 from src.pipeline_watchdog.config.parser import ConfigParser
 
 
-def test_parse(config_file_path, watch_config, empty_c):
+def test_parse(config_file_path, watch_config):
     config = ConfigParser(config_file_path).parse()
 
     assert len(config.watch_configs) == 2
@@ -22,3 +22,11 @@ def test_parse_empty(empty_config_file_path):
         match='No watch configs found in the config file. Please specify at least one.',
     ):
         ConfigParser(empty_config_file_path).parse()
+
+
+def test_parse_invalid(invalid_config_file_path):
+    with pytest.raises(
+        ValueError,
+        match='Field ".*" must be specified in the watch config.',
+    ):
+        ConfigParser(invalid_config_file_path).parse()
