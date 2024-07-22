@@ -19,6 +19,11 @@ from src.pipeline_watchdog.utils import init_logging
 
 LOG_LEVEL = os.environ.get('LOGLEVEL', 'INFO')
 
+BUFFER_SIZE_METRIC = 'buffer_size'
+LAST_SENT_MESSAGE_METRIC = 'last_sent_message'
+LAST_RECEIVED_MESSAGE_METRIC = 'last_received_message'
+
+
 init_logging(LOG_LEVEL)
 logger = logging.getLogger('PipelineWatchdog')
 
@@ -80,7 +85,7 @@ async def process_action(
         for container in containers:
             await docker_client.restart_container(container)
     else:
-        raise RuntimeError(f'Unknown action {action}')
+        raise RuntimeError(f'Unknown action: {action}')
 
 
 async def watch_queue(docker_client: DockerClient, buffer: str, config: QueueConfig):
@@ -88,7 +93,7 @@ async def watch_queue(docker_client: DockerClient, buffer: str, config: QueueCon
         content = await get_metrics(buffer)
         metrics = await parse_metrics(content)
 
-        buffer_size = metrics['buffer_size']
+        buffer_size = metrics[BUFFER_SIZE_METRIC]
 
         if buffer_size > config.length:
             logger.debug(
@@ -104,7 +109,7 @@ async def watch_egress(docker_client: DockerClient, buffer: str, config: FlowCon
         content = await get_metrics(buffer)
         metrics = await parse_metrics(content)
 
-        last_sent_message = metrics['last_sent_message']
+        last_sent_message = metrics[LAST_SENT_MESSAGE_METRIC]
         now = time.time()
 
         if now - last_sent_message > config.idle:
@@ -121,7 +126,7 @@ async def watch_ingress(docker_client: DockerClient, buffer: str, config: FlowCo
         content = await get_metrics(buffer)
         metrics = await parse_metrics(content)
 
-        last_received_message = metrics['last_received_message']
+        last_received_message = metrics[LAST_RECEIVED_MESSAGE_METRIC]
         now = time.time()
 
         if now - last_received_message > config.idle:
