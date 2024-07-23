@@ -61,6 +61,15 @@ Where:
 
 You can find an example configuration file in the [samples](samples/pipeline_monitoring/config.yml) folder.
 
+### Interpolation
+
+The configuration file supports variable interpolation. You can use a path to another node or environment variable in the configuration file by wrapping it in `${}`. For example:
+* `${oc.env:BUFFER_URL}` - will be replaced with the value of the `BUFFER_URL` environment variable.
+* `${.idle}` - will be replaced with the value of the `idle` key in the same section.
+
+For more information, refer to the [OmegaConf documentation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation).
+
+
 ## Sample
 
 The sample demonstrates how to start the watchdog service with an example pipeline to watch the buffer and restart the SDK client based on configuration and buffer state.

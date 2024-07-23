@@ -1,4 +1,5 @@
-import yaml
+from omegaconf import DictConfig, ListConfig, OmegaConf
+from omegaconf.errors import ConfigKeyError
 
 from src.pipeline_watchdog.config.config import *
 from src.pipeline_watchdog.utils import convert_to_seconds
@@ -13,11 +14,10 @@ class ConfigParser:
     def __parse_labels(labels_list: list) -> list:
         labels = []
         for label_dict in labels_list:
-            for label in label_dict.values():
-                if isinstance(label, list):
-                    labels.append(label)
-                else:
-                    labels.append([label])
+            if isinstance(label_dict.labels, ListConfig):
+                labels.append(label_dict.labels)
+            else:
+                labels.append([label_dict.labels])
         return labels
 
     @staticmethod
@@ -62,8 +62,12 @@ class ConfigParser:
 
     def parse(self) -> Config:
         with open(self._config_path, 'r') as file:
-            parsed_yaml = yaml.load(file, Loader=yaml.FullLoader)
-            watch = parsed_yaml.get('watch') if isinstance(parsed_yaml, dict) else None
+            parsed_yaml = OmegaConf.load(file)
+            watch = (
+                parsed_yaml.get('watch')
+                if isinstance(parsed_yaml, DictConfig)
+                else None
+            )
 
             if not watch:
                 raise ValueError(
@@ -72,9 +76,9 @@ class ConfigParser:
 
             try:
                 config = Config([self.__parse_watch_config(w) for w in watch])
-            except KeyError as e:
+            except ConfigKeyError as e:
                 raise ValueError(
-                    f'Field "{e.args[0]}" must be specified in the watch config.'
+                    f'Field "{e.key}" must be specified in the watch config.'
                 )
 
         return config

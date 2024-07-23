@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from src.pipeline_watchdog.config import WatchConfig
@@ -5,6 +7,8 @@ from src.pipeline_watchdog.config.parser import ConfigParser
 
 
 def test_parse(config_file_path, watch_config):
+    os.environ['POLLING_INTERVAL'] = '20s'
+
     config = ConfigParser(config_file_path).parse()
 
     assert len(config.watch_configs) == 2
