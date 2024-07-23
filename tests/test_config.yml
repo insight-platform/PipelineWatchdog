@@ -3,20 +3,22 @@ watch:
     queue:
       action: restart
       length: 18
-      restart_cooldown: 60s
+      cooldown: 60s
+      polling_interval: 10s
       container:
         - labels: [label1, label2=2]
         - labels: some-label
     egress:
       action: stop
-      restart_cooldown: 60s
+      cooldown: 60s
       idle: 100s
+      polling_interval: 20s
       container:
         - labels: egress-label=egress-value
         - labels: some-label
     ingress:
       action: restart
-      restart_cooldown: 30s
+      cooldown: 30s
       idle: 60s
       container:
         - labels: some-label

@@ -212,11 +212,15 @@ async def test_watch_queue(
 ):
     docker_client = docker_client_mock()
 
-    with mock.patch('asyncio.sleep', side_effect=asyncio.CancelledError) as sleep_mock:
+    with mock.patch(
+        'asyncio.sleep', side_effect=[None, asyncio.CancelledError]
+    ) as sleep_mock:
         try:
             await watch_queue(docker_client, watch_config.buffer, watch_config.queue)
         except asyncio.CancelledError:
-            sleep_mock.assert_awaited_once_with(watch_config.queue.restart_cooldown)
+            sleep_mock.assert_has_awaits(
+                [call(watch_config.queue.cooldown), call(watch_config.queue.cooldown)]
+            )
             pass
 
     get_metrics_mock.assert_awaited_once_with(watch_config.buffer)
@@ -240,11 +244,18 @@ async def test_watch_queue_empty(
 ):
     docker_client = docker_client_mock()
 
-    with mock.patch('asyncio.sleep', side_effect=asyncio.CancelledError) as sleep_mock:
+    with mock.patch(
+        'asyncio.sleep', side_effect=[None, asyncio.CancelledError]
+    ) as sleep_mock:
         try:
             await watch_queue(docker_client, watch_config.buffer, watch_config.queue)
         except asyncio.CancelledError:
-            sleep_mock.assert_awaited_once_with(watch_config.queue.restart_cooldown)
+            sleep_mock.assert_has_awaits(
+                [
+                    call(watch_config.queue.cooldown),
+                    call(watch_config.queue.polling_interval),
+                ]
+            )
             pass
 
     get_metrics_mock.assert_awaited_once_with(watch_config.buffer)
@@ -269,11 +280,15 @@ async def test_watch_egress(
 ):
     docker_client = docker_client_mock()
 
-    with mock.patch('asyncio.sleep', side_effect=asyncio.CancelledError) as sleep_mock:
+    with mock.patch(
+        'asyncio.sleep', side_effect=[None, asyncio.CancelledError]
+    ) as sleep_mock:
         try:
             await watch_egress(docker_client, watch_config.buffer, watch_config.egress)
         except asyncio.CancelledError:
-            sleep_mock.assert_awaited_once_with(watch_config.egress.restart_cooldown)
+            sleep_mock.assert_has_awaits(
+                [call(watch_config.egress.cooldown), call(watch_config.egress.cooldown)]
+            )
             pass
 
     get_metrics_mock.assert_awaited_once_with(watch_config.buffer)
@@ -300,11 +315,18 @@ async def test_watch_egress_message_just_sent(
 ):
     docker_client = docker_client_mock()
 
-    with mock.patch('asyncio.sleep', side_effect=asyncio.CancelledError) as sleep_mock:
+    with mock.patch(
+        'asyncio.sleep', side_effect=[None, asyncio.CancelledError]
+    ) as sleep_mock:
         try:
             await watch_egress(docker_client, watch_config.buffer, watch_config.egress)
         except asyncio.CancelledError:
-            sleep_mock.assert_awaited_once_with(watch_config.egress.restart_cooldown)
+            sleep_mock.assert_has_awaits(
+                [
+                    call(watch_config.egress.cooldown),
+                    call(watch_config.egress.polling_interval),
+                ]
+            )
             pass
 
     get_metrics_mock.assert_awaited_once_with(watch_config.buffer)
@@ -329,13 +351,20 @@ async def test_watch_ingress(
 ):
     docker_client = docker_client_mock()
 
-    with mock.patch('asyncio.sleep', side_effect=asyncio.CancelledError) as sleep_mock:
+    with mock.patch(
+        'asyncio.sleep', side_effect=[None, asyncio.CancelledError]
+    ) as sleep_mock:
         try:
             await watch_ingress(
                 docker_client, watch_config.buffer, watch_config.ingress
             )
         except asyncio.CancelledError:
-            sleep_mock.assert_awaited_once_with(watch_config.ingress.restart_cooldown)
+            sleep_mock.assert_has_awaits(
+                [
+                    call(watch_config.ingress.cooldown),
+                    call(watch_config.ingress.cooldown),
+                ]
+            )
             pass
 
     get_metrics_mock.assert_awaited_once_with(watch_config.buffer)
@@ -364,13 +393,20 @@ async def test_watch_ingress_message_just_received(
 ):
     docker_client = docker_client_mock()
 
-    with mock.patch('asyncio.sleep', side_effect=asyncio.CancelledError) as sleep_mock:
+    with mock.patch(
+        'asyncio.sleep', side_effect=[None, asyncio.CancelledError]
+    ) as sleep_mock:
         try:
             await watch_ingress(
                 docker_client, watch_config.buffer, watch_config.ingress
             )
         except asyncio.CancelledError:
-            sleep_mock.assert_awaited_once_with(watch_config.ingress.restart_cooldown)
+            sleep_mock.assert_has_awaits(
+                [
+                    call(watch_config.ingress.cooldown),
+                    call(watch_config.ingress.polling_interval),
+                ]
+            )
             pass
 
     get_metrics_mock.assert_awaited_once_with(watch_config.buffer)

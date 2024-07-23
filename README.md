@@ -17,20 +17,23 @@ watch:
       queue:
         action: <restart|stop>
         length: <int>
-        restart_cooldown: <int>
+        cooldown: <int>
+        polling_interval: <int>
         container:
           - labels: [<str>]
           # other labels
       egress:
         action: <restart|stop>
         idle: <int>
-        restart_cooldown: <int>
+        cooldown: <int>
+        polling_interval: <int>
         container:
           - labels: [<str>]
       ingress:
         action: <restart|stop>
         idle: <int>
-        restart_cooldown: <int>
+        cooldown: <int>
+        polling_interval: <int>
         container:
           - labels: [<str>]
           # other labels
@@ -42,13 +45,15 @@ Where:
 * `queue` - configuration for the buffer queue. Optional.
   * `action` - action to take when the queue length exceeds the length threshold. It can be `restart` or `stop`.
   * `length` - threshold length for the queue.
-  * `restart_cooldown` - interval in seconds between buffer queue length checks.
+  * `cooldown` - interval in seconds to wait after applying the action.
+  * `polling_interval` - interval in seconds to check the queue length.
   * `container` - list of labels to match for the action. Actions are performed on containers that match any of the label sets.
     * `labels` - one or more labels to match on the same container, i.e. the container must have all labels.
 * `ingress` or `egress` - configuration for the input or output traffic of the buffer. Optional.
   * `action` - action to take when the time since the last input or output message exceeds the idle threshold. It can be `restart` or `stop`.
   * `idle` - threshold time in seconds since the last input or output message.
-  * `restart_cooldown` - interval in seconds between ingress or egress idle checks.
+  * `cooldown` - interval in seconds to wait after applying the action.
+  * `polling_interval` - interval in seconds between buffer traffic checks. Optional. Default equals to `idle`.
   * `container` - list of labels to match for the action. Actions are performed on containers that match any of the label sets.
     * `labels` - one or more labels to match on the same container, i.e. the container must have all labels.
 
@@ -62,6 +67,8 @@ The sample demonstrates how to start the watchdog service with an example pipeli
 
 ### Run
 
+This sample is designed to run on x86 architecture only.
+
 ```bash
 docker compose -f samples/pipeline_monitoring/docker-compose.yml up --build -d
 ```
@@ -69,11 +76,14 @@ docker compose -f samples/pipeline_monitoring/docker-compose.yml up --build -d
 ### Check
 
 After starting the pipeline, you can check the logs of the client container:
+
 ```bash
 docker logs -f pipeline_monitoring-client-1
 ```
-When the client stops processing messages for more than `egress.idle` seconds (see [config](samples/pipeline_monitoring/config.yml)) 
+
+When the client stops processing messages for more than `egress.idle` seconds (see [config](samples/pipeline_monitoring/config.yml))
 you will see the following logs in the client container, and the container itself will be restarted:
+
 ```
 Traceback (most recent call last):
   File "/opt/savant/src/client.py", line 52, in <module>

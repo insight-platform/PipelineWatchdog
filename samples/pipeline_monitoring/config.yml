@@ -3,19 +3,19 @@ watch:
     queue:
       action: stop
       length: 999
-      restart_cooldown: 60s
+      cooldown: 60s
       container:
         - labels: [queue-client-label1, queue-client-label2=2]
     egress:
       action: restart
-      restart_cooldown: 60s
+      cooldown: 60s
       idle: 100s
       container:
         - labels: egress-client-label=egress-client-value
         - labels: some-label
     ingress:
       action: restart
-      restart_cooldown: 30s
+      cooldown: 30s
       idle: 60s
       container:
         - labels: ingress-client-label=3

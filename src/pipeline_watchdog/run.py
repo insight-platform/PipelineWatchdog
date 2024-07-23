@@ -89,6 +89,8 @@ async def process_action(
 
 
 async def watch_queue(docker_client: DockerClient, buffer: str, config: QueueConfig):
+    await asyncio.sleep(config.cooldown)
+
     while True:
         content = await get_metrics(buffer)
         metrics = await parse_metrics(content)
@@ -100,11 +102,14 @@ async def watch_queue(docker_client: DockerClient, buffer: str, config: QueueCon
                 'Buffer %s is full, processing action %s', buffer, config.action
             )
             await process_action(docker_client, config.action, config.container_labels)
-
-        await asyncio.sleep(config.restart_cooldown)
+            await asyncio.sleep(config.cooldown)
+        else:
+            await asyncio.sleep(config.polling_interval)
 
 
 async def watch_egress(docker_client: DockerClient, buffer: str, config: FlowConfig):
+    await asyncio.sleep(config.cooldown)
+
     while True:
         content = await get_metrics(buffer)
         metrics = await parse_metrics(content)
@@ -117,11 +122,14 @@ async def watch_egress(docker_client: DockerClient, buffer: str, config: FlowCon
                 'Egress flow %s is idle, processing action %s', buffer, config.action
             )
             await process_action(docker_client, config.action, config.container_labels)
-
-        await asyncio.sleep(config.restart_cooldown)
+            await asyncio.sleep(config.cooldown)
+        else:
+            await asyncio.sleep(config.polling_interval)
 
 
 async def watch_ingress(docker_client: DockerClient, buffer: str, config: FlowConfig):
+    await asyncio.sleep(config.cooldown)
+
     while True:
         content = await get_metrics(buffer)
         metrics = await parse_metrics(content)
@@ -134,8 +142,9 @@ async def watch_ingress(docker_client: DockerClient, buffer: str, config: FlowCo
                 'Ingress flow %s is idle, processing action %s', buffer, config.action
             )
             await process_action(docker_client, config.action, config.container_labels)
-
-        await asyncio.sleep(config.restart_cooldown)
+            await asyncio.sleep(config.cooldown)
+        else:
+            await asyncio.sleep(config.polling_interval)
 
 
 async def watch_buffer(docker_client: DockerClient, config: WatchConfig):

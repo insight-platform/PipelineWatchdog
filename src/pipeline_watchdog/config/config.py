@@ -19,7 +19,10 @@ class QueueConfig:
     length: int
     """Maximum buffer queue length."""
 
-    restart_cooldown: int
+    cooldown: int
+    """Interval in seconds to wait after applying the action."""
+
+    polling_interval: int
     """Interval in seconds between buffer queue length checks."""
 
     container_labels: List[List[str]]
@@ -36,8 +39,11 @@ class FlowConfig:
     idle: int
     """Maximum time in seconds buffer traffic can be idle."""
 
-    restart_cooldown: int
-    """Interval in seconds between checks that buffer traffic is idle."""
+    cooldown: int
+    """Interval in seconds to wait after applying the action."""
+
+    polling_interval: Optional[int]
+    """Interval in seconds between buffer traffic checks."""
 
     container_labels: List[List[str]]
     """List of labels to filter the containers to which the action is applied."""

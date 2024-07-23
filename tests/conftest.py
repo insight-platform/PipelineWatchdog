@@ -15,19 +15,22 @@ def watch_config() -> WatchConfig:
         queue=QueueConfig(
             action=Action.RESTART,
             length=18,
-            restart_cooldown=60,
+            cooldown=60,
+            polling_interval=10,
             container_labels=[['label1', 'label2=2'], ['some-label']],
         ),
         egress=FlowConfig(
             action=Action.STOP,
             idle=100,
-            restart_cooldown=60,
+            cooldown=60,
+            polling_interval=20,
             container_labels=[['egress-label=egress-value'], ['some-label']],
         ),
         ingress=FlowConfig(
             action=Action.RESTART,
             idle=60,
-            restart_cooldown=30,
+            cooldown=30,
+            polling_interval=60,
             container_labels=[['some-label']],
         ),
     )

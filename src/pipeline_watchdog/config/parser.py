@@ -28,7 +28,8 @@ class ConfigParser:
         return QueueConfig(
             action=Action(queue_config['action']),
             length=queue_config['length'],
-            restart_cooldown=convert_to_seconds(queue_config['restart_cooldown']),
+            cooldown=convert_to_seconds(queue_config['cooldown']),
+            polling_interval=convert_to_seconds(queue_config['polling_interval']),
             container_labels=ConfigParser.__parse_labels(queue_config['container']),
         )
 
@@ -37,10 +38,16 @@ class ConfigParser:
         if flow_config is None:
             return None
 
+        idle = convert_to_seconds(flow_config['idle'])
+        polling_interval = flow_config.get('polling_interval')
+
         return FlowConfig(
             action=Action(flow_config['action']),
-            idle=convert_to_seconds(flow_config['idle']),
-            restart_cooldown=convert_to_seconds(flow_config['restart_cooldown']),
+            idle=idle,
+            cooldown=convert_to_seconds(flow_config['cooldown']),
+            polling_interval=(
+                convert_to_seconds(polling_interval) if polling_interval else idle
+            ),
             container_labels=ConfigParser.__parse_labels(flow_config['container']),
         )
 
