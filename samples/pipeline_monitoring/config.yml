@@ -4,6 +4,7 @@ watch:
       action: stop
       length: 999
       cooldown: 60s
+      polling_interval: 10s
       container:
         - labels: [queue-client-label1, queue-client-label2=2]
     egress:
