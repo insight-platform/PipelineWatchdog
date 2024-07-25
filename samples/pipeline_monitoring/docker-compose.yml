@@ -64,8 +64,8 @@ services:
   pipeline-watchdog:
     container_name: pipeline-watchdog
     build:
-      context: ../..
-      dockerfile: ./samples/pipeline_monitoring/Dockerfile
+      context: ../../
+      dockerfile: Dockerfile
     restart: unless-stopped
     network_mode: host
     volumes:
