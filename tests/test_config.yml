@@ -15,7 +15,7 @@ watch:
       polling_interval: ${oc.env:POLLING_INTERVAL}
       container:
         - labels: egress-label=egress-value
-        - labels: some-label
+        - labels: [some-label]
     ingress:
       action: restart
       cooldown: 30s

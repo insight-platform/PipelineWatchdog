@@ -88,10 +88,7 @@ def config_file_path():
     )
 )
 def empty_config_file_path(request, tmpdir):
-    config_file = tmpdir.join('empty_config.txt')
-    config_file.write(request.param)
-
-    return str(config_file)
+    return create_tmp_config_file(tmpdir, request.param)
 
 
 @pytest.fixture(
@@ -103,9 +100,61 @@ def empty_config_file_path(request, tmpdir):
     )
 )
 def invalid_config_file_path(request, tmpdir):
+    return create_tmp_config_file(tmpdir, request.param)
+
+
+@pytest.fixture(
+    params=(
+        {
+            'watch': [
+                {
+                    'buffer': 'buffer1:8000',
+                    'queue': {
+                        'action': 'restart',
+                        'length': 18,
+                        'cooldown': '60s',
+                        'polling_interval': '10s',
+                        'container': [],
+                    },
+                }
+            ]
+        },
+        {
+            'watch': [
+                {
+                    'buffer': 'buffer1:8000',
+                    'egress': {
+                        'action': 'restart',
+                        'idle': '100s',
+                        'cooldown': '60s',
+                        'container': [],
+                    },
+                }
+            ]
+        },
+        {
+            'watch': [
+                {
+                    'buffer': 'buffer1:8000',
+                    'ingress': {
+                        'action': 'restart',
+                        'idle': '100s',
+                        'cooldown': '60s',
+                        'container': [],
+                    },
+                }
+            ]
+        },
+    )
+)
+def invalid_config_with_empty_labels(request, tmpdir):
+    return create_tmp_config_file(tmpdir, request.param)
+
+
+def create_tmp_config_file(tmpdir, config):
     config_file = tmpdir.join('empty_config.txt')
 
-    yaml_str = yaml.dump(request.param)
+    yaml_str = yaml.dump(config)
     config_file.write(yaml_str)
 
     return str(config_file)

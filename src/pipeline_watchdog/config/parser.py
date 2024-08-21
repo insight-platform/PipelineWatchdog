@@ -12,13 +12,15 @@ class ConfigParser:
 
     @staticmethod
     def __parse_labels(labels_list: list) -> list:
-        labels = []
-        for label_dict in labels_list:
-            if isinstance(label_dict.labels, ListConfig):
-                labels.append(label_dict.labels)
-            else:
-                labels.append([label_dict.labels])
-        return labels
+        container_labels = []
+        for label_dict in OmegaConf.to_object(labels_list):
+            labels = label_dict.get('labels')
+            if labels is not None:
+                if isinstance(labels, list):
+                    container_labels.append(labels)
+                else:
+                    container_labels.append([labels])
+        return container_labels
 
     @staticmethod
     def __parse_queue_config(queue_config: dict):
