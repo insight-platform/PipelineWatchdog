@@ -4,6 +4,11 @@ from enum import Enum
 from typing import List, Optional
 
 
+def validate_container_labels(labels: List[List[str]]):
+    if not labels:
+        raise ValueError(f'Container labels cannot be empty.')
+
+
 class Action(Enum):
     STOP = 'stop'
     RESTART = 'restart'
@@ -28,6 +33,9 @@ class QueueConfig:
     container_labels: List[List[str]]
     """List of labels to filter the containers to which the action is applied."""
 
+    def __post_init__(self):
+        validate_container_labels(self.container_labels)
+
 
 @dataclass
 class FlowConfig:
@@ -47,6 +55,9 @@ class FlowConfig:
 
     container_labels: List[List[str]]
     """List of labels to filter the containers to which the action is applied."""
+
+    def __post_init__(self):
+        validate_container_labels(self.container_labels)
 
 
 @dataclass
