@@ -148,12 +148,20 @@ async def watch_ingress(docker_client: DockerClient, buffer: str, config: FlowCo
 
 
 async def watch_buffer(docker_client: DockerClient, config: WatchConfig):
-    logger.info('Watching buffer metrics %s', config.buffer)
-    await asyncio.gather(
-        watch_queue(docker_client, config.buffer, config.queue),
-        watch_egress(docker_client, config.buffer, config.egress),
-        watch_ingress(docker_client, config.buffer, config.ingress),
-    )
+    logger.info('Watching buffer [%s] metrics', config.buffer)
+    watches = []
+
+    if config.queue:
+        logger.info('Watching queue: %s', config.queue)
+        watches.append(watch_queue(docker_client, config.buffer, config.queue))
+    if config.egress:
+        logger.info('Watching egress flow: %s', config.egress)
+        watches.append(watch_egress(docker_client, config.buffer, config.egress))
+    if config.ingress:
+        logger.info('Watching ingress flow: %s', config.ingress)
+        watches.append(watch_ingress(docker_client, config.buffer, config.ingress))
+
+    await asyncio.gather(*watches)
 
 
 def main():
