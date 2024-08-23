@@ -70,6 +70,27 @@ The configuration file supports variable interpolation. You can use a path to an
 For more information, refer to the [OmegaConf documentation](https://omegaconf.readthedocs.io/en/2.3_branch/usage.html#variable-interpolation).
 
 
+## Usage
+
+You can find the watchdog service image on:
+* for x86: [GitHub Packages](https://github.com/insight-platform/PipelineWatchdog/pkgs/container/pipeline-watchdog-x86)
+* for arm64: [GitHub Packages](https://github.com/insight-platform/PipelineWatchdog/pkgs/container/pipeline-watchdog-arm64)
+
+Configuration of a docker service might be as follows
+```yaml
+  pipeline-watchdog:
+    image: ghcr.io/insight-platform/pipeline-watchdog-<arh_name>:main
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.yml:/app/config.yml
+    environment:
+      - LOGLEVEL=INFO
+      - CONFIG_FILE_PATH=/app/config.yml
+```
+
+
 ## Sample
 
 The sample demonstrates how to start the watchdog service with an example pipeline to watch the buffer and restart the SDK client based on configuration and buffer state.

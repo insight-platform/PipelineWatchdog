@@ -291,7 +291,10 @@ async def test_watch_queue(
             await watch_queue(docker_client, watch_config.buffer, watch_config.queue)
         except asyncio.CancelledError:
             sleep_mock.assert_has_awaits(
-                [call(watch_config.queue.cooldown), call(watch_config.queue.cooldown)]
+                [
+                    call(watch_config.queue.polling_interval),
+                    call(watch_config.queue.cooldown),
+                ]
             )
             pass
 
@@ -324,7 +327,7 @@ async def test_watch_queue_empty(
         except asyncio.CancelledError:
             sleep_mock.assert_has_awaits(
                 [
-                    call(watch_config.queue.cooldown),
+                    call(watch_config.queue.polling_interval),
                     call(watch_config.queue.polling_interval),
                 ]
             )
@@ -359,7 +362,10 @@ async def test_watch_egress(
             await watch_egress(docker_client, watch_config.buffer, watch_config.egress)
         except asyncio.CancelledError:
             sleep_mock.assert_has_awaits(
-                [call(watch_config.egress.cooldown), call(watch_config.egress.cooldown)]
+                [
+                    call(watch_config.egress.polling_interval),
+                    call(watch_config.egress.cooldown),
+                ]
             )
             pass
 
@@ -395,7 +401,7 @@ async def test_watch_egress_message_just_sent(
         except asyncio.CancelledError:
             sleep_mock.assert_has_awaits(
                 [
-                    call(watch_config.egress.cooldown),
+                    call(watch_config.egress.polling_interval),
                     call(watch_config.egress.polling_interval),
                 ]
             )
@@ -433,7 +439,7 @@ async def test_watch_ingress(
         except asyncio.CancelledError:
             sleep_mock.assert_has_awaits(
                 [
-                    call(watch_config.ingress.cooldown),
+                    call(watch_config.ingress.polling_interval),
                     call(watch_config.ingress.cooldown),
                 ]
             )
@@ -475,7 +481,7 @@ async def test_watch_ingress_message_just_received(
         except asyncio.CancelledError:
             sleep_mock.assert_has_awaits(
                 [
-                    call(watch_config.ingress.cooldown),
+                    call(watch_config.ingress.polling_interval),
                     call(watch_config.ingress.polling_interval),
                 ]
             )

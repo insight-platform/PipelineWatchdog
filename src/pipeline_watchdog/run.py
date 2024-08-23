@@ -89,7 +89,7 @@ async def process_action(
 
 
 async def watch_queue(docker_client: DockerClient, buffer: str, config: QueueConfig):
-    await asyncio.sleep(config.cooldown)
+    await asyncio.sleep(config.polling_interval)
 
     while True:
         content = await get_metrics(buffer)
@@ -108,7 +108,7 @@ async def watch_queue(docker_client: DockerClient, buffer: str, config: QueueCon
 
 
 async def watch_egress(docker_client: DockerClient, buffer: str, config: FlowConfig):
-    await asyncio.sleep(config.cooldown)
+    await asyncio.sleep(config.polling_interval)
 
     while True:
         content = await get_metrics(buffer)
@@ -128,7 +128,7 @@ async def watch_egress(docker_client: DockerClient, buffer: str, config: FlowCon
 
 
 async def watch_ingress(docker_client: DockerClient, buffer: str, config: FlowConfig):
-    await asyncio.sleep(config.cooldown)
+    await asyncio.sleep(config.polling_interval)
 
     while True:
         content = await get_metrics(buffer)
