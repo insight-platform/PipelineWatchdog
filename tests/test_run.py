@@ -113,6 +113,78 @@ async def test_watch_buffer(
 @pytest.mark.asyncio
 @mock.patch('src.pipeline_watchdog.run.watch_ingress')
 @mock.patch('src.pipeline_watchdog.run.watch_egress')
+@mock.patch('src.pipeline_watchdog.run.watch_queue')
+@mock.patch('src.pipeline_watchdog.run.DockerClient')
+async def test_watch_buffer_queue_only(
+    docker_client_mock,
+    watch_queue_mock,
+    watch_egress_mock,
+    watch_ingress_mock,
+    config_with_queue_only,
+):
+    docker_client = docker_client_mock()
+
+    watch_config = config_with_queue_only.watch_configs[0]
+
+    await watch_buffer(docker_client, watch_config)
+    watch_queue_mock.assert_awaited_once_with(
+        docker_client, watch_config.buffer, watch_config.queue
+    )
+    watch_egress_mock.assert_not_awaited()
+    watch_ingress_mock.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@mock.patch('src.pipeline_watchdog.run.watch_ingress')
+@mock.patch('src.pipeline_watchdog.run.watch_egress')
+@mock.patch('src.pipeline_watchdog.run.watch_queue')
+@mock.patch('src.pipeline_watchdog.run.DockerClient')
+async def test_watch_buffer_egress_only(
+    docker_client_mock,
+    watch_queue_mock,
+    watch_egress_mock,
+    watch_ingress_mock,
+    config_with_egress_only,
+):
+    docker_client = docker_client_mock()
+
+    watch_config = config_with_egress_only.watch_configs[0]
+
+    await watch_buffer(docker_client, watch_config)
+    watch_egress_mock.assert_awaited_once_with(
+        docker_client, watch_config.buffer, watch_config.egress
+    )
+    watch_queue_mock.assert_not_awaited()
+    watch_ingress_mock.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@mock.patch('src.pipeline_watchdog.run.watch_ingress')
+@mock.patch('src.pipeline_watchdog.run.watch_egress')
+@mock.patch('src.pipeline_watchdog.run.watch_queue')
+@mock.patch('src.pipeline_watchdog.run.DockerClient')
+async def test_watch_buffer_ingress_only(
+    docker_client_mock,
+    watch_queue_mock,
+    watch_egress_mock,
+    watch_ingress_mock,
+    config_with_ingress_only,
+):
+    docker_client = docker_client_mock()
+
+    watch_config = config_with_ingress_only.watch_configs[0]
+
+    await watch_buffer(docker_client, watch_config)
+    watch_ingress_mock.assert_awaited_once_with(
+        docker_client, watch_config.buffer, watch_config.ingress
+    )
+    watch_queue_mock.assert_not_awaited()
+    watch_egress_mock.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+@mock.patch('src.pipeline_watchdog.run.watch_ingress')
+@mock.patch('src.pipeline_watchdog.run.watch_egress')
 @mock.patch('src.pipeline_watchdog.run.watch_queue', side_effect=RuntimeError('error'))
 @mock.patch('src.pipeline_watchdog.run.DockerClient')
 async def test_watch_buffer_watch_queue_failed(
